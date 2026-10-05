@@ -8,9 +8,9 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Mengecualikan rute statis (images, favicon) dan _next/static
-     * agar middleware tidak memblokir aset visual.
+     * Mengecualikan rute statis, favicon, PWA files (sw.js, manifest.json),
+     * dan aset gambar agar tidak diblokir oleh middleware.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -42,12 +42,34 @@ export default async function LoginPage({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required />
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="•••••••••••"
+                required
+              />
             </div>
 
-            {/* Tampilkan pesan error jika login gagal */}
+            {/* Checkbox Ingat Saya (Native HTML styled with Tailwind) */}
+            <div className="flex items-center space-x-2 mt-1">
+              <input
+                type="checkbox"
+                id="remember"
+                name="remember"
+                defaultChecked
+                className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-900 dark:ring-offset-zinc-950"
+              />
+              <Label
+                htmlFor="remember"
+                className="text-sm font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer"
+              >
+                Ingat Saya
+              </Label>
+            </div>
+
             {params?.error && (
-              <p className="text-sm font-medium text-destructive (text-red-500)">
+              <p className="text-sm font-medium text-destructive">
                 {params.error}
               </p>
             )}

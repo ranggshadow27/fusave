@@ -166,7 +166,7 @@ export function TransactionDialog({
                 </div>
 
                 {/* Input Jam Manual */}
-                {/* <div className="col-span-1 relative">
+                <div className="col-span-1 relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none">
                     <Clock01Icon size={16} />
                   </div>
@@ -177,7 +177,7 @@ export function TransactionDialog({
                     className="pl-9 h-10 text-xs dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-100"
                     required
                   />
-                </div> */}
+                </div>
               </div>
             </div>
 

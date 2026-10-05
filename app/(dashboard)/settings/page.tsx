@@ -15,10 +15,13 @@ import {
   Wallet01Icon,
   Tag01Icon,
   Delete01Icon,
+  Logout01Icon,
 } from "hugeicons-react";
+import { logout } from "@/app/login/actions";
 import { revalidatePath } from "next/cache";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { formatRupiah } from "@/utils/format";
+import { ActionConfirm } from "@/components/action-confirm";
 import {
   Select,
   SelectContent,
@@ -204,15 +207,15 @@ export default async function SettingsPage() {
                         {formatRupiah(Number(w.balance))}
                       </p>
                     </div>
-                    <form action={deleteWallet}>
-                      <input type="hidden" name="id" value={w.id} />
-                      <button
-                        type="submit"
-                        className="text-zinc-400 hover:text-rose-600 p-1 transition-colors"
-                      >
-                        <Delete01Icon size={16} />
-                      </button>
-                    </form>
+                    <ActionConfirm
+                      title="Hapus Dompet?"
+                      description={`Yakin ingin menghapus dompet "${w.name}"? Saldo yang tersisa mungkin akan hangus dan transaksi yang terkait bisa bermasalah.`}
+                      triggerContent={<Delete01Icon size={16} />}
+                      triggerClassName="text-zinc-400 hover:text-rose-600 p-1.5 transition-colors flex items-center justify-center rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                      action={deleteWallet}
+                      idValue={w.id}
+                      confirmText="Ya, Hapus Dompet"
+                    />
                   </li>
                 ))}
                 {wallets?.length === 0 && (
@@ -311,15 +314,15 @@ export default async function SettingsPage() {
                         {c.type === "income" ? "Masuk" : "Keluar"}
                       </span>
                     </div>
-                    <form action={deleteCategory}>
-                      <input type="hidden" name="id" value={c.id} />
-                      <button
-                        type="submit"
-                        className="text-zinc-400 hover:text-rose-600 p-1 transition-colors"
-                      >
-                        <Delete01Icon size={16} />
-                      </button>
-                    </form>
+                    <ActionConfirm
+                      title="Hapus Kategori?"
+                      description={`Yakin ingin menghapus kategori "${c.name}"?`}
+                      triggerContent={<Delete01Icon size={16} />}
+                      triggerClassName="text-zinc-400 hover:text-rose-600 p-1.5 transition-colors flex items-center justify-center rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                      action={deleteCategory}
+                      idValue={c.id}
+                      confirmText="Ya, Hapus Kategori"
+                    />
                   </li>
                 ))}
                 {categories?.length === 0 && (
@@ -330,6 +333,32 @@ export default async function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 3. ZONA BAHAYA (LOGOUT) UNTUK MOBILE & DESKTOP */}
+      <Card className="shadow-sm border-rose-200 bg-rose-50/50 dark:border-rose-900/30 dark:bg-rose-950/20 mt-8">
+        <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 py-6">
+          <div className="text-center sm:text-left">
+            <h3 className="text-base font-semibold text-rose-700 dark:text-rose-400">
+              Keluar dari Aplikasi
+            </h3>
+            <p className="text-sm text-rose-600/80 dark:text-rose-400/80 mt-1">
+              Sesi Anda akan diakhiri secara aman.
+            </p>
+          </div>
+          <ActionConfirm
+            title="Keluar Akun?"
+            description="Apakah Anda yakin ingin keluar dari aplikasi Fusave? Anda harus login kembali menggunakan kredensial Anda untuk masuk."
+            triggerContent={
+              <>
+                <Logout01Icon size={18} /> Keluar Akun
+              </>
+            }
+            triggerClassName="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white h-9 px-4 rounded-4xl text-sm font-medium transition-colors"
+            action={logout}
+            confirmText="Ya, Keluar"
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

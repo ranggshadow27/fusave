@@ -11,7 +11,10 @@ export async function addTransaction(formData: FormData) {
   if (!user) return { error: "Unauthorized" };
 
   const type = formData.get("type") as string; // 'expense' atau 'income'
-  const amount = parseFloat(formData.get("amount") as string);
+
+  const rawAmount = formData.get("amount") as string;
+  const amount = parseFloat(rawAmount.replace(/\./g, ""));
+
   const wallet_id = formData.get("wallet_id") as string;
   const category_id = formData.get("category_id") as string;
   const transaction_date = formData.get("transaction_date") as string;

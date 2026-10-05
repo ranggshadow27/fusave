@@ -6,9 +6,11 @@ import {
   Home01Icon,
   Wallet01Icon,
   PieChartIcon,
-  UserIcon,
   Settings01Icon,
+  Logout01Icon,
 } from "hugeicons-react";
+import { logout } from "@/app/login/actions";
+import { ActionConfirm } from "@/components/action-confirm";
 
 export default function DashboardLayout({
   children,
@@ -42,6 +44,23 @@ export default function DashboardLayout({
             label="Pengaturan"
           />
         </nav>
+
+        {/* TOMBOL LOGOUT DESKTOP */}
+        <div className="mt-auto border-t border-zinc-200 p-4 dark:border-zinc-800">
+          <ActionConfirm
+            title="Keluar Akun?"
+            description="Apakah Anda yakin ingin keluar dari aplikasi Fusave?"
+            triggerContent={
+              <>
+                <Logout01Icon size={20} />
+                <span>Keluar</span>
+              </>
+            }
+            triggerClassName="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-rose-600 transition-all duration-300 ease-out hover:bg-rose-50 dark:text-rose-500 dark:hover:bg-rose-900/20 active:scale-95"
+            action={logout}
+            confirmText="Ya, Keluar"
+          />
+        </div>
       </aside>
 
       {/* KONTEN UTAMA */}
@@ -68,7 +87,7 @@ export default function DashboardLayout({
         />
         <MobileNavItem
           href="/settings"
-          icon={<UserIcon size={24} />}
+          icon={<Settings01Icon size={24} />}
           label="Pengaturan"
         />
       </nav>

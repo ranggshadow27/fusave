@@ -15,8 +15,10 @@ import { deleteTransaction } from "@/app/(dashboard)/actions";
 const formatDate = (dateString: string) => {
   if (!dateString) return "-";
 
-  // Pastikan string waktu dibersihkan agar aman diparsing browser
-  const date = new Date(dateString);
+  // [FIX BUG]: Ganti spasi dengan huruf 'T' agar sesuai standar ISO 8601
+  // Mengubah "2026-10-05 11:57:51+00" menjadi "2026-10-05T11:57:51+00"
+  const safeDateString = dateString.replace(" ", "T");
+  const date = new Date(safeDateString);
 
   if (isNaN(date.getTime())) return "-";
 
