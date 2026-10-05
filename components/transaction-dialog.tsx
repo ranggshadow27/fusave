@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react"; // <-- Import useTransition
 import {
   Dialog,
   DialogContent,
@@ -27,9 +27,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { addTransaction } from "@/app/(dashboard)/actions";
-import { PlusSignIcon, Calendar01Icon, Clock01Icon } from "hugeicons-react";
+import { PlusSignIcon, Calendar01Icon } from "hugeicons-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { toast } from "sonner"; // <-- Import toast dari sonner
 
 export function TransactionDialog({
   wallets,
@@ -40,8 +41,8 @@ export function TransactionDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState("expense");
+  const [isPending, startTransition] = useTransition(); // <-- Hook transisi untuk loading state
 
-  // State untuk Tanggal & Waktu terpisah agar mudah diatur
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState("12:00");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -53,7 +54,6 @@ export function TransactionDialog({
     if (open) {
       const now = new Date();
       setSelectedDate(now);
-      // Ambil jam dan menit saat ini (format HH:mm)
       const hours = String(now.getHours()).padStart(2, "0");
       const minutes = String(now.getMinutes()).padStart(2, "0");
       setSelectedTime(`${hours}:${minutes}`);
@@ -71,12 +71,14 @@ export function TransactionDialog({
     }
   }, [type, categories]);
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
     formData.append("type", type);
     formData.append("wallet_id", selectedWallet);
     formData.append("category_id", selectedCategory);
 
-    // Gabungkan tanggal yang dipilih dari kalender dengan jam yang dipilih
     if (selectedDate) {
       const [hours, minutes] = selectedTime.split(":");
       const combinedDate = new Date(selectedDate);
@@ -86,8 +88,17 @@ export function TransactionDialog({
       formData.set("transaction_date", combinedDate.toISOString());
     }
 
-    await addTransaction(formData);
-    setOpen(false);
+    // Bungkus dengan startTransition agar isPending bernilai true saat server action berjalan
+    startTransition(async () => {
+      const result = await addTransaction(formData);
+
+      if (result?.error) {
+        toast.error("Gagal menyimpan transaksi: " + result.error);
+      } else {
+        toast.success("Transaksi berhasil dicatat!");
+        setOpen(false); // Tutup dialog hanya jika sukses
+      }
+    });
   };
 
   return (
@@ -95,9 +106,10 @@ export function TransactionDialog({
       open={open}
       onOpenChange={(isOpen) => {
         if (isOpen) setOpen(true);
+        else setOpen(false);
       }}
     >
-      <DialogTrigger className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+      <DialogTrigger className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 cursor-pointer">
         <PlusSignIcon size={28} />
       </DialogTrigger>
 
@@ -110,35 +122,34 @@ export function TransactionDialog({
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger
               value="expense"
-              className="data-[state=active]:bg-rose-100 data-[state=active]:text-rose-700"
+              className="data-[state=active]:bg-rose-100 data-[state=active]:text-rose-700 cursor-pointer"
             >
               Pengeluaran
             </TabsTrigger>
             <TabsTrigger
               value="income"
-              className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700"
+              className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 cursor-pointer"
             >
               Pemasukan
             </TabsTrigger>
           </TabsList>
 
-          <form action={handleSubmit} className="mt-4 space-y-4">
+          {/* Gunakan onSubmit biasa agar kita bisa kontrol via startTransition */}
+          <form onSubmit={handleSubmit} className="mt-4 space-y-4">
             <div className="space-y-2">
               <Label>Nominal</Label>
               <CurrencyInput name="amount" autoComplete="off" required />
             </div>
 
-            {/* WAKTU TRANSAKSI MENGGUNAKAN KALENDER & JAM SHADCN */}
             <div className="space-y-2">
               <Label>Waktu Transaksi</Label>
               <div className="grid grid-cols-3 gap-2">
-                {/* Popover Kalender */}
-                <div className="col-span-2">
+                <div className="col-span-3">
                   <Popover
                     open={isCalendarOpen}
                     onOpenChange={setIsCalendarOpen}
                   >
-                    <PopoverTrigger className="inline-flex h-10 w-full items-center justify-start rounded-md border border-zinc-200 bg-transparent px-3 text-sm font-medium shadow-sm transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+                    <PopoverTrigger className="inline-flex h-10 w-full items-center justify-start rounded-md border border-zinc-200 bg-transparent px-3 text-sm font-medium shadow-sm transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
                       <Calendar01Icon
                         size={18}
                         className="mr-2 text-zinc-500 shrink-0"
@@ -164,32 +175,17 @@ export function TransactionDialog({
                     </PopoverContent>
                   </Popover>
                 </div>
-
-                {/* Input Jam Manual */}
-                <div className="col-span-1 relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none">
-                    <Clock01Icon size={16} />
-                  </div>
-                  <Input
-                    type="time"
-                    value={selectedTime}
-                    onChange={(e) => setSelectedTime(e.target.value)}
-                    className="pl-9 h-10 text-xs dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-100"
-                    required
-                  />
-                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {/* DOMPET SELECT SHADCN */}
               <div className="space-y-2">
                 <Label>Dompet</Label>
                 <Select
                   value={selectedWallet}
                   onValueChange={(val) => setSelectedWallet(val || "")}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full cursor-pointer">
                     <span>
                       {wallets.find((w) => w.id === selectedWallet)?.name ||
                         "Pilih dompet"}
@@ -197,7 +193,11 @@ export function TransactionDialog({
                   </SelectTrigger>
                   <SelectContent>
                     {wallets.map((w) => (
-                      <SelectItem key={w.id} value={w.id}>
+                      <SelectItem
+                        key={w.id}
+                        value={w.id}
+                        className="cursor-pointer"
+                      >
                         {w.name}
                       </SelectItem>
                     ))}
@@ -205,14 +205,13 @@ export function TransactionDialog({
                 </Select>
               </div>
 
-              {/* KATEGORI SELECT SHADCN */}
               <div className="space-y-2">
                 <Label>Kategori</Label>
                 <Select
                   value={selectedCategory}
                   onValueChange={(val) => setSelectedCategory(val || "")}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full cursor-pointer">
                     <span>
                       {filteredCategories.find((c) => c.id === selectedCategory)
                         ?.name || "Pilih kategori"}
@@ -220,7 +219,11 @@ export function TransactionDialog({
                   </SelectTrigger>
                   <SelectContent>
                     {filteredCategories.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
+                      <SelectItem
+                        key={c.id}
+                        value={c.id}
+                        className="cursor-pointer"
+                      >
                         {c.name}
                       </SelectItem>
                     ))}
@@ -243,14 +246,43 @@ export function TransactionDialog({
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
+                disabled={isPending}
+                className="cursor-pointer"
               >
                 Batal
               </Button>
               <Button
                 type="submit"
-                className="bg-blue-600 text-white hover:bg-blue-700"
+                disabled={isPending}
+                className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer active:scale-[0.98] disabled:opacity-75 flex items-center gap-2"
               >
-                Simpan Transaksi
+                {isPending ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>Menyimpan...</span>
+                  </>
+                ) : (
+                  <span>Simpan Transaksi</span>
+                )}
               </Button>
             </div>
           </form>

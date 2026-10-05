@@ -50,11 +50,12 @@ export default async function DashboardPage() {
     .from("transactions")
     .select(
       `
-    *, 
-    category:categories(name), 
-    wallet:wallets(name),
-    profiles(full_name) 
-  `,
+      *, 
+      categories:categories(name), 
+      wallets:wallets(name),
+      profiles:profiles(full_name)
+    `,
+      { count: "exact" },
     )
     .order("transaction_date", { ascending: false })
     .order("created_at", { ascending: false })
@@ -124,7 +125,7 @@ export default async function DashboardPage() {
             {/* DIALOG RINCIAN DOMPET */}
             <Dialog>
               <DialogTrigger
-                className="flex items-center justify-center rounded-full p-1.5 text-zinc-400 transition-all hover:bg-zinc-200/60 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400"
+                className="flex items-center cursor-pointer justify-center rounded-full p-1.5 text-zinc-400 transition-all hover:bg-zinc-200/60 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400"
                 title="Lihat rincian dompet"
               >
                 <Wallet01Icon size={20} />

@@ -1,5 +1,4 @@
 import { login } from "./actions";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -9,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SubmitButton } from "@/components/submit-button"; // <-- Import komponen interaktif
 
 export default async function LoginPage({
   searchParams,
@@ -46,19 +46,18 @@ export default async function LoginPage({
                 id="password"
                 name="password"
                 type="password"
-                placeholder="•••••••••••"
+                placeholder="•••••••"
                 required
               />
             </div>
 
-            {/* Checkbox Ingat Saya (Native HTML styled with Tailwind) */}
             <div className="flex items-center space-x-2 mt-1">
               <input
                 type="checkbox"
                 id="remember"
                 name="remember"
                 defaultChecked
-                className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-900 dark:ring-offset-zinc-950"
+                className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-900 dark:ring-offset-zinc-950 cursor-pointer"
               />
               <Label
                 htmlFor="remember"
@@ -74,12 +73,8 @@ export default async function LoginPage({
               </p>
             )}
 
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2"
-            >
-              Masuk
-            </Button>
+            {/* Tombol Interaktif dengan State Pending/Loading */}
+            <SubmitButton />
           </form>
         </CardContent>
       </Card>

@@ -20,12 +20,13 @@ export default async function TransactionsPage({
   const from = (page - 1) * ITEMS_PER_PAGE;
   const to = from + ITEMS_PER_PAGE - 1;
 
+  // Sesuaikan alias relasi agar cocok dengan transaction-list (categories dan wallets)
   let query = supabase.from("transactions").select(
     `
       *, 
-      category:categories(name), 
-      wallet:wallets(name),
-      profiles(full_name)
+      categories:categories(name), 
+      wallets:wallets(name),
+      profiles:profiles(full_name)
     `,
     { count: "exact" },
   );
@@ -55,20 +56,10 @@ export default async function TransactionsPage({
       .ilike("name", `%${searchLower}%`);
     const walIds = wals?.map((w) => w.id).join(",") || "";
 
-    // 3. Cari ID Profil (User) yang email/namanya cocok
-    // (Sesuaikan ilike 'email' dengan 'full_name' jika kamu pakai full_name di tabel profiles)
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select("id")
-      .ilike("email", `%${searchLower}%`);
-    const profIds = profs?.map((p) => p.id).join(",") || "";
-
-    // 4. Rakit Filter OR untuk Transaksi
-    // Cari di notes ATAU category_id cocok ATAU wallet_id cocok ATAU user_id cocok
+    // 3. Rakit Filter OR untuk Transaksi
     let orString = `notes.ilike.%${searchLower}%`;
     if (catIds) orString += `,category_id.in.(${catIds})`;
     if (walIds) orString += `,wallet_id.in.(${walIds})`;
-    if (profIds) orString += `,user_id.in.(${profIds})`;
 
     query = query.or(orString);
   }

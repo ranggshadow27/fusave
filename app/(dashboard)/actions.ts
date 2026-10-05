@@ -53,7 +53,8 @@ export async function addTransaction(formData: FormData) {
 
   // Refresh semua halaman yang terpengaruh
   revalidatePath("/");
-  revalidatePath("/profile");
+  revalidatePath("/transactions");
+  revalidatePath("/analytics");
 
   return { success: true };
 }

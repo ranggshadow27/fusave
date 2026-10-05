@@ -164,7 +164,7 @@ export function TransactionFilter({ totalPages, currentPage }: FilterProps) {
         </div>
 
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-          <PopoverTrigger className="inline-flex h-10 items-center justify-center rounded-md border border-zinc-200 bg-transparent px-3 text-sm font-medium shadow-sm transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 relative">
+          <PopoverTrigger className="inline-flex h-10 items-center justify-center rounded-full cursor-pointer border border-zinc-200 bg-transparent px-3 text-sm font-medium shadow-sm transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 relative">
             <FilterIcon
               size={20}
               className="sm:mr-2 text-zinc-600 dark:text-zinc-400"
@@ -260,7 +260,7 @@ export function TransactionFilter({ totalPages, currentPage }: FilterProps) {
             <button
               disabled={currentPage <= 1}
               onClick={() => changePage(currentPage - 1)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 bg-transparent text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:pointer-events-none disabled:opacity-50 dark:border-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 sm:w-auto sm:px-3 sm:py-1 sm:text-xs"
+              className="inline-flex h-8 w-8 items-center justify-center cursor-pointer rounded-md border border-zinc-200 bg-transparent text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:pointer-events-none disabled:opacity-50 dark:border-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 sm:w-auto sm:px-3 sm:py-1 sm:text-xs"
             >
               <ArrowLeft01Icon size={16} className="sm:mr-1" />
               <span className="hidden sm:inline font-medium">Sebelumnnya</span>
@@ -273,7 +273,7 @@ export function TransactionFilter({ totalPages, currentPage }: FilterProps) {
                   key={idx}
                   onClick={() => changePage(num)}
                   disabled={num === "..."}
-                  className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-sm transition-colors ${
+                  className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer rounded-md text-sm transition-colors ${
                     num === currentPage
                       ? "bg-blue-600 font-semibold text-white hover:bg-blue-700 shadow-sm"
                       : num === "..."
@@ -290,7 +290,7 @@ export function TransactionFilter({ totalPages, currentPage }: FilterProps) {
             <button
               disabled={currentPage >= totalPages}
               onClick={() => changePage(currentPage + 1)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 bg-transparent text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:pointer-events-none disabled:opacity-50 dark:border-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 sm:w-auto sm:px-3 sm:py-1 sm:text-xs"
+              className="inline-flex h-8 w-8 items-center justify-center cursor-pointer rounded-md border border-zinc-200 bg-transparent text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:pointer-events-none disabled:opacity-50 dark:border-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 sm:w-auto sm:px-3 sm:py-1 sm:text-xs"
             >
               <span className="hidden sm:inline font-medium">Selanjutnya</span>
               <ArrowRight01Icon size={16} className="sm:ml-1" />

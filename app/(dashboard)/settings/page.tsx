@@ -6,9 +6,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   ComputerIcon,
@@ -17,18 +14,11 @@ import {
   Delete01Icon,
   Logout01Icon,
 } from "hugeicons-react";
-import { logout } from "@/app/login/actions";
 import { revalidatePath } from "next/cache";
-import { CurrencyInput } from "@/components/ui/currency-input";
 import { formatRupiah } from "@/utils/format";
 import { ActionConfirm } from "@/components/action-confirm";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"; // Import Select dari Shadcn
+import { logout } from "@/app/login/actions";
+import { WalletForm, CategoryFormClient } from "@/components/settings-forms"; // <-- Import form interaktif baru
 
 // === SERVER ACTIONS ===
 
@@ -38,16 +28,17 @@ async function addWallet(formData: FormData) {
   const name = formData.get("name") as string;
   const rawBalance = formData.get("balance") as string;
 
-  // Bersihkan format titik
   const cleanBalance = Number(rawBalance.replace(/\./g, ""));
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (user) {
-    await supabase
+    const { error } = await supabase
       .from("wallets")
       .insert([{ name, balance: cleanBalance, user_id: user.id }]);
+
+    if (error) return { error: error.message };
     revalidatePath("/settings");
   }
 }
@@ -73,9 +64,11 @@ async function addCategory(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (user) {
-    await supabase
+    const { error } = await supabase
       .from("categories")
       .insert([{ name, type, icon, user_id: user.id }]);
+
+    if (error) return { error: error.message };
     revalidatePath("/settings");
   }
 }
@@ -115,7 +108,7 @@ export default async function SettingsPage() {
         </p>
       </div>
 
-      {/* 1. PREFERENSI TAMPILAN (Full Width) */}
+      {/* 1. PREFERENSI TAMPILAN */}
       <Card className="shadow-sm border-zinc-200 dark:border-zinc-800">
         <CardHeader>
           <div className="flex items-center gap-3">
@@ -159,34 +152,8 @@ export default async function SettingsPage() {
           </CardHeader>
 
           <CardContent className="space-y-6 flex-1 flex flex-col">
-            <form action={addWallet} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="wallet-name">Nama Dompet</Label>
-                <Input
-                  id="wallet-name"
-                  name="name"
-                  placeholder="Misal: BCA, Gopay"
-                  autoComplete="off"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="wallet-balance">Saldo Awal</Label>
-                <CurrencyInput
-                  id="wallet-balance"
-                  name="balance"
-                  placeholder="0"
-                  autoComplete="off"
-                  required
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Tambah Dompet
-              </Button>
-            </form>
+            {/* Menggunakan Form Klien Interaktif */}
+            <WalletForm addWalletAction={addWallet} />
 
             <div className="border-t border-zinc-100 pt-4 dark:border-zinc-800 flex-1">
               <h4 className="mb-3 text-sm font-semibold">
@@ -209,12 +176,13 @@ export default async function SettingsPage() {
                     </div>
                     <ActionConfirm
                       title="Hapus Dompet?"
-                      description={`Yakin ingin menghapus dompet "${w.name}"? Saldo yang tersisa mungkin akan hangus dan transaksi yang terkait bisa bermasalah.`}
+                      description={`Yakin ingin menghapus dompet "${w.name}"? Saldo dan data terkait mungkin akan terpengaruh.`}
                       triggerContent={<Delete01Icon size={16} />}
-                      triggerClassName="text-zinc-400 hover:text-rose-600 p-1.5 transition-colors flex items-center justify-center rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                      triggerClassName="text-zinc-400 hover:text-rose-600 p-1.5 transition-colors flex items-center justify-center rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer"
                       action={deleteWallet}
                       idValue={w.id}
                       confirmText="Ya, Hapus Dompet"
+                      successMessage="Dompet berhasil dihapus!"
                     />
                   </li>
                 ))}
@@ -243,58 +211,8 @@ export default async function SettingsPage() {
           </CardHeader>
 
           <CardContent className="space-y-6 flex-1 flex flex-col">
-            <form action={addCategory} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="cat-name">Nama Kategori</Label>
-                <Input
-                  id="cat-name"
-                  name="name"
-                  placeholder="Misal: Makan, Gaji"
-                  autoComplete="off"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cat-type">Tipe</Label>
-                  {/* SHADCN SELECT DENGAN ATRIBUT NAME */}
-                  <Select name="type">
-                    <SelectTrigger id="cat-type" className="w-full">
-                      <SelectValue placeholder="Pilih Tipe" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="expense">Pengeluaran</SelectItem>
-                      <SelectItem value="income">Pemasukan</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="cat-icon">Ikon</Label>
-                  <Select name="icon">
-                    <SelectTrigger id="cat-icon" className="w-full">
-                      <SelectValue placeholder="Pilih Ikon" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="food">Makanan</SelectItem>
-                      <SelectItem value="transport">Transportasi</SelectItem>
-                      <SelectItem value="shopping">Belanja</SelectItem>
-                      <SelectItem value="salary">Gaji / Uang Masuk</SelectItem>
-                      <SelectItem value="bill">Tagihan</SelectItem>
-                      <SelectItem value="other">Lainnya</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Tambah Kategori
-              </Button>
-            </form>
+            {/* Menggunakan Form Klien Interaktif */}
+            <CategoryFormClient addCategoryAction={addCategory} />
 
             <div className="border-t border-zinc-100 pt-4 dark:border-zinc-800 flex-1">
               <h4 className="mb-3 text-sm font-semibold">
@@ -318,10 +236,11 @@ export default async function SettingsPage() {
                       title="Hapus Kategori?"
                       description={`Yakin ingin menghapus kategori "${c.name}"?`}
                       triggerContent={<Delete01Icon size={16} />}
-                      triggerClassName="text-zinc-400 hover:text-rose-600 p-1.5 transition-colors flex items-center justify-center rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                      triggerClassName="text-zinc-400 hover:text-rose-600 p-1.5 transition-colors flex items-center justify-center rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer"
                       action={deleteCategory}
                       idValue={c.id}
                       confirmText="Ya, Hapus Kategori"
+                      successMessage="Kategori berhasil dihapus!"
                     />
                   </li>
                 ))}
@@ -334,7 +253,7 @@ export default async function SettingsPage() {
         </Card>
       </div>
 
-      {/* 3. ZONA BAHAYA (LOGOUT) UNTUK MOBILE & DESKTOP */}
+      {/* 3. ZONA KELUAR AKUN */}
       <Card className="shadow-sm border-rose-200 bg-rose-50/50 dark:border-rose-900/30 dark:bg-rose-950/20 mt-8">
         <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 py-6">
           <div className="text-center sm:text-left">
@@ -347,13 +266,13 @@ export default async function SettingsPage() {
           </div>
           <ActionConfirm
             title="Keluar Akun?"
-            description="Apakah Anda yakin ingin keluar dari aplikasi Fusave? Anda harus login kembali menggunakan kredensial Anda untuk masuk."
+            description="Apakah Anda yakin ingin keluar dari aplikasi Fusave?"
             triggerContent={
               <>
                 <Logout01Icon size={18} /> Keluar Akun
               </>
             }
-            triggerClassName="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white h-9 px-4 rounded-4xl text-sm font-medium transition-colors"
+            triggerClassName="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white h-9 px-4 rounded-4xl text-sm font-medium transition-colors cursor-pointer"
             action={logout}
             confirmText="Ya, Keluar"
           />
