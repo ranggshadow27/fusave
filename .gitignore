@@ -1,41 +1,74 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# =========================
+# Node & Dependencies
+# =========================
 /node_modules
 /.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+.pnp.js
+.yarn/install-state.gz
 
-# testing
-/coverage
-
-# next.js
+# =========================
+# Next.js & Build Output
+# =========================
 /.next/
 /out/
-
-# production
 /build
+/dist
 
-# misc
-.DS_Store
+# =========================
+# Environment Variables (SANGAT PENTING)
+# =========================
+# Jangan pernah membagikan file .env ke public repository.
+# Kunci rahasia Supabase (terutama SERVICE_ROLE_KEY & DB_PASSWORD) harus aman di sini.
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 *.pem
 
-# debug
+# =========================
+# Supabase Local CLI
+# =========================
+# Jika kamu menggunakan Supabase CLI untuk local development
+/supabase/.temp/
+/supabase/.branches/
+/supabase/dump.sql
+
+# =========================
+# Logs & Debugging
+# =========================
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+logs
+*.log
 
-# env files (can opt-in for committing if needed)
-.env*
+# =========================
+# Testing
+# =========================
+/coverage
+/.nyc_output
 
-# vercel
-.vercel
+# =========================
+# OS & System Files
+# =========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# =========================
+# Editor & IDE (Opsional tapi disarankan)
+# =========================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
